@@ -231,6 +231,7 @@ func handleProtoPacket(data []byte, fromServer bool, timestamp time.Time) {
 					seed = possibleSeed
 					xorPad = possibleXorPad
 					writeProto("GetPlayerTokenRsp", map[int32]string{tag: "string server_rand_key"}, "", "")
+					LoadProto("GetPlayerTokenRsp")
 					continue
 				}
 			}
@@ -281,7 +282,14 @@ func handleProtoPacket(data []byte, fromServer bool, timestamp time.Time) {
 				deducedPacketIds[packetId] = "GetPlayerTokenRsp"
 				packetIdMap[packetId] = "GetPlayerTokenRsp"
 				packetNameMap["GetPlayerTokenRsp"] = packetId
-				LoadProto("GetPlayerTokenRsp")
+				if len(possibleServerSeeds) == 1 {
+					var tag int32
+					for k, _ := range possibleServerSeeds {
+						tag = k
+					}
+					writeProto("GetPlayerTokenRsp", map[int32]string{tag: "string server_rand_key"}, "", "")
+					LoadProto("GetPlayerTokenRsp")
+				}
 			} else {
 				log.Println("Didn't get GetPlayerTokenRsp, retrying for next packet...")
 				packetCounter = 1
